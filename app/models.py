@@ -8,6 +8,7 @@ class RecipeDTO(BaseModel):
     name: str
     description: str
     ingredients: Dict
+    category: str
     timestamp: datetime | None = datetime.now()
 
     def update_recipe(self):
@@ -18,6 +19,7 @@ class CreateRecipeDTO(BaseModel):
     name: str
     description: str
     ingredients: Dict
+    category: str
     timestamp: datetime | None = datetime.now()
 
 

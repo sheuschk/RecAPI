@@ -34,3 +34,7 @@ class RepositoryInterface:
     def get_recipes(self, limit: int, offset: int) -> List[RecipeDTO]:
         raise NotImplementedError
 
+    def search_recipes(self, search: str, limit: int, offset: int) -> List[RecipeDTO]:
+        raise NotImplementedError
+
+

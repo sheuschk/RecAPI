@@ -43,6 +43,7 @@ class SqliteRepository(RepositoryInterface):
                                     name VARCHAR(100) NOT NULL,
                                     description text,
                                     ingredients json,
+                                    category text,
                                     timestamp integer
                                 )"""  # TODO timestamp for creation or update text NOT NUll
                             )
@@ -58,48 +59,73 @@ class SqliteRepository(RepositoryInterface):
         return True
 
     def get_recipe(self, recipe_id: int) -> RecipeDTO:
+        self.connect()
         cur = self.connection.cursor()
-        cur.execute("SELECT id, name, description, ingredients, timestamp FROM recipes WHERE id=?", (recipe_id, ))
+        cur.execute("SELECT id, name, description, ingredients, category, timestamp FROM recipes WHERE id=?", (recipe_id, ))
         row = cur.fetchone()
         cur.close()
-        return RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=json.loads(row[3]),
-                         timestamp=datetime.fromtimestamp(row[4]))
+        self.disconnect()
+        return RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=json.loads(row[3]), category=row[4],
+                         timestamp=datetime.fromtimestamp(row[5]))
 
     def create_recipe(self, recipe: CreateRecipeDTO) -> None:
+        self.connect()
         cur = self.connection.cursor()
         # ingredients = jsonable_encoder(CreateRecipeDTO)["ingredients"]
-        cur.execute("INSERT INTO recipes(name, description, ingredients, timestamp) VALUES (?, ?, ?, ?)",
-                    (recipe.name, recipe.description, json.dumps(recipe.ingredients), recipe.timestamp.timestamp()))
+        cur.execute("INSERT INTO recipes(name, description, ingredients, category, timestamp) VALUES (?, ?, ?, ?, ?)",
+                    (recipe.name, recipe.description, json.dumps(recipe.ingredients), recipe.category, recipe.timestamp.timestamp()))
         self.connection.commit()
+        self.disconnect()
 
     def update_recipe(self, recipe: RecipeDTO) -> None:
+        self.connect()
         cur = self.connection.cursor()
-        cur.execute("UPDATE recipes SET name = ?, description = ?, ingredients = ?, timestamp = ? WHERE id = ?",
-                    (recipe.name, recipe.description, json.dumps(recipe.ingredients), recipe.timestamp.timestamp(),
+        cur.execute("UPDATE recipes SET name = ?, description = ?, ingredients = ?, category = ?, timestamp = ? WHERE id = ?",
+                    (recipe.name, recipe.description, json.dumps(recipe.ingredients), recipe.category, recipe.timestamp.timestamp(),
                      recipe.id))
         self.connection.commit()
+        self.disconnect()
 
     def delete_recipe(self, recipe_id: int) -> None:
+        self.connect()
         cur = self.connection.cursor()
         cur.execute("DELETE FROM recipes WHERE id = ?", (recipe_id, ))
         self.connection.commit()
+        self.disconnect()
 
     def check_if_recipe_exist(self, recipe_id: int) -> bool:
+        self.connect()
         cur = self.connection.cursor()
-        cur.execute("SELECT id, name, description, ingredients FROM recipes WHERE id = ?", (recipe_id, ))
+        cur.execute("SELECT id, name, description, ingredients, category FROM recipes WHERE id = ?", (recipe_id, ))
         row = cur.fetchone()
         cur.close()
+        self.disconnect()
         if row is None:
             return False
         return True
 
     def get_recipes(self, limit: int, offset: int) -> List[RecipeDTO]:
+        self.connect()
         cur = self.connection.cursor()
-        sql = f"""SELECT id, name, description, ingredients, timestamp FROM recipes
+        sql = f"""SELECT id, name, description, ingredients, category, timestamp FROM recipes
          ORDER BY timestamp desc LIMIT {limit} OFFSET {offset}"""
         cur.execute(sql)
         rows = cur.fetchall()
-        return [RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=json.loads(row[3]),
-                          timestamp=datetime.fromtimestamp(row[4])) for row in rows]
+        self.disconnect()
+        return [RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=json.loads(row[3]), category=row[4],
+                          timestamp=datetime.fromtimestamp(row[5])) for row in rows]
+
+    def search_recipes(self, search: str, limit: int, offset: int) -> List[RecipeDTO]:
+        self.connect()
+        cur = self.connection.cursor()
+        sql = f"""SELECT id, name, description, ingredients, category, timestamp FROM recipes 
+        WHERE name LIKE ? OR ingredients LIKE ? OR category LIKE ?
+        ORDER BY timestamp desc LIMIT {limit} OFFSET {offset}"""
+        search_term = f"%{search}%"
+        cur.execute(sql, (search_term, search_term, search_term,))
+        rows = cur.fetchall()
+        self.disconnect()
+        return [RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=json.loads(row[3]), category=row[4],
+                          timestamp=datetime.fromtimestamp(row[5])) for row in rows]
 
 
