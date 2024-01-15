@@ -34,6 +34,8 @@ async def get_recipe_list(request: Request, search: str = None, limit: int = 10,
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Selecting Recipes was not feasible")
+    if recipes is None:
+        recipes = []
     recipe_list = RecipeListDTO(recipes=recipes, limit=limit, offset=offset)
     return recipe_list
 
