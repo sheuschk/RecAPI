@@ -7,7 +7,7 @@ class RecipeDTO(BaseModel):
     id: int
     name: str
     description: str
-    ingredients: Dict
+    ingredients: List[Dict]
     category: str
     timestamp: datetime | None = datetime.now()
 
@@ -16,6 +16,14 @@ class RecipeDTO(BaseModel):
 
 
 class CreateRecipeDTO(BaseModel):
+    name: str
+    description: str
+    ingredients: List[Dict]
+    category: str
+    timestamp: datetime | None = datetime.now()
+
+
+class SaveRecipeDTO(BaseModel):
     name: str
     description: str
     ingredients: Dict
@@ -27,4 +35,3 @@ class RecipeListDTO(BaseModel):
     offset: int | None
     limit: int | None
     recipes: List[RecipeDTO]
-    pages: int | None

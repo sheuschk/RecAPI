@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, Depends
-from models import CreateRecipeDTO, RecipeDTO, RecipeListDTO
+from models import CreateRecipeDTO, RecipeDTO, RecipeListDTO, SaveRecipeDTO
 
 # TODO's: Sort (maybe on client side + discard offset and limit)
 
@@ -30,13 +30,10 @@ async def get_recipe_list(request: Request, search: str = None, limit: int = 10,
             recipes = request.app.db.search_recipes(search, limit, offset)
         else:
             recipes = request.app.db.get_recipes(limit, offset)
-
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Selecting Recipes was not feasible")
-    if recipes is None:
-        recipes = []
-    recipe_list = RecipeListDTO(recipes=recipes, limit=limit, offset=offset, pages=0)
+    recipe_list = RecipeListDTO(recipes=recipes, limit=limit, offset=offset)
     return recipe_list
 
 
@@ -63,8 +60,14 @@ async def update_recipe(request: Request, recipe: RecipeDTO = Depends(recipe_dto
 
 @router.post("/")
 async def create_recipe(request: Request, recipe: CreateRecipeDTO):
+    ingredients = recipe.ingredients
+    ingredient_dict = {}
+    for key in range(len(ingredients)):
+        ingredient_dict[key] = ingredients[key]
+    new_recipe = SaveRecipeDTO(name=recipe.name, description=recipe.description, ingredients=ingredient_dict,
+                               category=recipe.category)
     try:
-        request.app.db.create_recipe(recipe)
+        request.app.db.create_recipe(new_recipe)
         return {"Msg": "Creation successful"}
     except Exception as e:
         print(e)

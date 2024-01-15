@@ -65,7 +65,7 @@ class SqliteRepository(RepositoryInterface):
         row = cur.fetchone()
         cur.close()
         self.disconnect()
-        return RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=json.loads(row[3]), category=row[4],
+        return RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=list(json.loads(row[3]).values()), category=row[4],
                          timestamp=datetime.fromtimestamp(row[5]))
 
     def create_recipe(self, recipe: CreateRecipeDTO) -> None:
@@ -112,8 +112,9 @@ class SqliteRepository(RepositoryInterface):
         cur.execute(sql)
         rows = cur.fetchall()
         self.disconnect()
-        return [RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=json.loads(row[3]), category=row[4],
-                          timestamp=datetime.fromtimestamp(row[5])) for row in rows]
+        print(type(rows[0][3]))
+        return [RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=list(json.loads(row[3]).values()),
+                          category=row[4], timestamp=datetime.fromtimestamp(row[5])) for row in rows]
 
     def search_recipes(self, search: str, limit: int, offset: int) -> List[RecipeDTO]:
         self.connect()
