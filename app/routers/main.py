@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, Depends
-from ..models import CreateRecipeDTO, RecipeDTO, RecipeListDTO
+from models import CreateRecipeDTO, RecipeDTO, RecipeListDTO
 
 # TODO's: Sort (maybe on client side + discard offset and limit)
 

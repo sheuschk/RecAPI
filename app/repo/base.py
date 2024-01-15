@@ -1,5 +1,5 @@
 from typing import List
-from ..models import CreateRecipeDTO, RecipeDTO
+from models import CreateRecipeDTO, RecipeDTO
 
 
 class RepositoryInterface:

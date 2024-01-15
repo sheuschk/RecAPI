@@ -1,7 +1,7 @@
 import sqlite3
 import json
 from .base import RepositoryInterface
-from ..models import RecipeDTO, CreateRecipeDTO
+from models import RecipeDTO, CreateRecipeDTO
 from datetime import datetime
 from typing import List
 
