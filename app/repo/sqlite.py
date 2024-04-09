@@ -1,5 +1,6 @@
 import sqlite3
 import json
+import os
 from .base import RepositoryInterface
 from models import RecipeDTO, CreateRecipeDTO
 from datetime import datetime
@@ -47,16 +48,22 @@ class SqliteRepository(RepositoryInterface):
                                     timestamp integer
                                 )"""  # TODO timestamp for creation or update text NOT NUll
                             )
-            # if "ingredients" not in tables:
-            #     cur.execute("""CREATE TABLE ingredients(
-            #                        id integer Unique PRIMARY KEY,
-            #                        recipe_id integer NOT NULL,
-            #                        ingredient_dict text NOT NULL,
-            #                        FOREIGN KEY (recipe_id) REFERENCES recipes(id)
-            #                    )""") # Or every ingredient on its own quantity&desc
+                self.connection.commit()
+                self.create_data()
         finally:
-            self.connection.commit()
+            self.disconnect()
         return True
+
+    def create_data(self) -> None:
+        with open("../recipes.json") as recipe_file:
+            recipes_list = json.load(recipe_file)
+        for recipe in recipes_list:
+            recipeDTO = CreateRecipeDTO(name=recipe["name"],
+                                        description=recipe["description"],
+                                        ingredients=recipe["ingredients"],
+                                        category=recipe["category"],
+                                        )
+            self.create_recipe(recipeDTO)
 
     def get_recipe(self, recipe_id: int) -> RecipeDTO:
         self.connect()
