@@ -11,9 +11,6 @@ class RecipeDTO(BaseModel):
     category: str
     timestamp: datetime | None = datetime.now()
 
-    def update_recipe(self):
-        self.timestamp = datetime.now()
-
 
 class CreateRecipeDTO(BaseModel):
     name: str
@@ -24,14 +21,16 @@ class CreateRecipeDTO(BaseModel):
 
 
 class SaveRecipeDTO(BaseModel):
+    id: int | None
     name: str
     description: str
     ingredients: Dict
     category: str
     timestamp: datetime | None = datetime.now()
 
+    def update_recipe(self):
+        self.timestamp = datetime.now()
+
 
 class RecipeListDTO(BaseModel):
-    offset: int | None
-    limit: int | None
     recipes: List[RecipeDTO]

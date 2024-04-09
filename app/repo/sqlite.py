@@ -2,7 +2,7 @@ import sqlite3
 import json
 import os
 from .base import RepositoryInterface
-from models import RecipeDTO, CreateRecipeDTO
+from models import RecipeDTO, SaveRecipeDTO
 from datetime import datetime
 from typing import List
 
@@ -58,7 +58,7 @@ class SqliteRepository(RepositoryInterface):
         with open("../recipes.json") as recipe_file:
             recipes_list = json.load(recipe_file)
         for recipe in recipes_list:
-            recipeDTO = CreateRecipeDTO(name=recipe["name"],
+            recipeDTO = SaveRecipeDTO(name=recipe["name"],
                                         description=recipe["description"],
                                         ingredients=recipe["ingredients"],
                                         category=recipe["category"],
@@ -75,10 +75,9 @@ class SqliteRepository(RepositoryInterface):
         return RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=list(json.loads(row[3]).values()), category=row[4],
                          timestamp=datetime.fromtimestamp(row[5]))
 
-    def create_recipe(self, recipe: CreateRecipeDTO) -> None:
+    def create_recipe(self, recipe: SaveRecipeDTO) -> None:
         self.connect()
         cur = self.connection.cursor()
-        # ingredients = jsonable_encoder(CreateRecipeDTO)["ingredients"]
         cur.execute("INSERT INTO recipes(name, description, ingredients, category, timestamp) VALUES (?, ?, ?, ?, ?)",
                     (recipe.name, recipe.description, json.dumps(recipe.ingredients), recipe.category, recipe.timestamp.timestamp()))
         self.connection.commit()
@@ -111,24 +110,23 @@ class SqliteRepository(RepositoryInterface):
             return False
         return True
 
-    def get_recipes(self, limit: int, offset: int) -> List[RecipeDTO]:
+    def get_recipes(self) -> List[RecipeDTO]:
         self.connect()
         cur = self.connection.cursor()
         sql = f"""SELECT id, name, description, ingredients, category, timestamp FROM recipes
-         ORDER BY timestamp desc LIMIT {limit} OFFSET {offset}"""
+         ORDER BY timestamp desc """ #LIMIT {limit} OFFSET {offset}
         cur.execute(sql)
         rows = cur.fetchall()
         self.disconnect()
-        print(type(rows[0][3]))
         return [RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=list(json.loads(row[3]).values()),
                           category=row[4], timestamp=datetime.fromtimestamp(row[5])) for row in rows]
 
-    def search_recipes(self, search: str, limit: int, offset: int) -> List[RecipeDTO]:
+    def search_recipes(self, search: str) -> List[RecipeDTO]:
         self.connect()
         cur = self.connection.cursor()
         sql = f"""SELECT id, name, description, ingredients, category, timestamp FROM recipes 
         WHERE name LIKE ? OR ingredients LIKE ? OR category LIKE ?
-        ORDER BY timestamp desc LIMIT {limit} OFFSET {offset}"""
+        ORDER BY timestamp desc """ # LIMIT {limit} OFFSET {offset}
         search_term = f"%{search}%"
         cur.execute(sql, (search_term, search_term, search_term,))
         rows = cur.fetchall()

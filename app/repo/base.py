@@ -1,5 +1,5 @@
 from typing import List
-from models import CreateRecipeDTO, RecipeDTO
+from models import SaveRecipeDTO, RecipeDTO
 
 
 class RepositoryInterface:
@@ -19,7 +19,7 @@ class RepositoryInterface:
     def get_recipe(self, recipe_id: int) -> RecipeDTO:
         raise NotImplementedError
 
-    def create_recipe(self, recipe: CreateRecipeDTO) -> None:
+    def create_recipe(self, recipe: SaveRecipeDTO) -> None:
         raise NotImplementedError
 
     def update_recipe(self, recipe: RecipeDTO) -> None:
@@ -31,10 +31,10 @@ class RepositoryInterface:
     def check_if_recipe_exist(self, recipe_id: int) -> bool:
         raise NotImplementedError
 
-    def get_recipes(self, limit: int, offset: int) -> List[RecipeDTO]:
+    def get_recipes(self) -> List[RecipeDTO]:
         raise NotImplementedError
 
-    def search_recipes(self, search: str, limit: int, offset: int) -> List[RecipeDTO]:
+    def search_recipes(self, search: str) -> List[RecipeDTO]:
         raise NotImplementedError
 
 

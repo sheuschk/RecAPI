@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, Depends
-from models import CreateRecipeDTO, RecipeDTO, RecipeListDTO, SaveRecipeDTO
+from models import SaveRecipeDTO, RecipeDTO, RecipeListDTO, CreateRecipeDTO
 
 # TODO's: Sort (maybe on client side + discard offset and limit)
 
@@ -24,16 +24,16 @@ def recipe_id_exists(recipe_id, request: Request):
 
 
 @router.get("/", response_model=RecipeListDTO)
-async def get_recipe_list(request: Request, search: str = None, limit: int = 10, offset: int = 0) -> RecipeListDTO:
+async def get_recipe_list(request: Request, search: str = None) -> RecipeListDTO:
     try:
         if search is not None:
-            recipes = request.app.db.search_recipes(search, limit, offset)
+            recipes = request.app.db.search_recipes(search)
         else:
-            recipes = request.app.db.get_recipes(limit, offset)
+            recipes = request.app.db.get_recipes()
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Selecting Recipes was not feasible")
-    recipe_list = RecipeListDTO(recipes=recipes, limit=limit, offset=offset)
+    recipe_list = RecipeListDTO(recipes=recipes)
     return recipe_list
 
 
@@ -49,9 +49,16 @@ async def get_recipe(request: Request, recipe_id: int = Depends(recipe_id_exists
 
 @router.put("/")
 async def update_recipe(request: Request, recipe: RecipeDTO = Depends(recipe_dto_id_exists)):
+    ingredients = recipe.ingredients
+    ingredient_dict = {}
+    for key in range(len(ingredients)):
+        ingredient_dict[key] = ingredients[key]
+    new_recipe = SaveRecipeDTO(id=recipe.id, name=recipe.name, description=recipe.description, ingredients=ingredient_dict,
+                               category=str(recipe.category)) #, timestamp=recipe.timestamp)
+
     try:
-        recipe.update_recipe()
-        request.app.db.update_recipe(recipe)
+        # new_recipe.update_recipe()
+        request.app.db.update_recipe(new_recipe)
         return {"Msg": "Update successful"}
     except Exception as e:
         print(e)
