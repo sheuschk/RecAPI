@@ -131,7 +131,7 @@ class SqliteRepository(RepositoryInterface):
         cur.execute(sql, (search_term, search_term, search_term,))
         rows = cur.fetchall()
         self.disconnect()
-        return [RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=json.loads(row[3]), category=row[4],
-                          timestamp=datetime.fromtimestamp(row[5])) for row in rows]
+        return [RecipeDTO(id=row[0], name=row[1], description=row[2], ingredients=list(json.loads(row[3]).values()),
+                          category=row[4], timestamp=datetime.fromtimestamp(row[5])) for row in rows]
 
 
