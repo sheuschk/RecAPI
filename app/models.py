@@ -21,7 +21,7 @@ class CreateRecipeDTO(BaseModel):
 
 
 class SaveRecipeDTO(BaseModel):
-    id: int | None
+    id: int = None
     name: str
     description: str
     ingredients: Dict

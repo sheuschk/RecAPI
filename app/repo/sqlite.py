@@ -61,7 +61,7 @@ class SqliteRepository(RepositoryInterface):
             recipeDTO = SaveRecipeDTO(name=recipe["name"],
                                         description=recipe["description"],
                                         ingredients=recipe["ingredients"],
-                                        category=recipe["category"],
+                                        category=recipe["category"]
                                         )
             self.create_recipe(recipeDTO)
 

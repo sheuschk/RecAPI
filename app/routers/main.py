@@ -55,7 +55,6 @@ async def update_recipe(request: Request, recipe: RecipeDTO = Depends(recipe_dto
         ingredient_dict[key] = ingredients[key]
     new_recipe = SaveRecipeDTO(id=recipe.id, name=recipe.name, description=recipe.description, ingredients=ingredient_dict,
                                category=str(recipe.category)) #, timestamp=recipe.timestamp)
-
     try:
         # new_recipe.update_recipe()
         request.app.db.update_recipe(new_recipe)
